@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          {% if profile.avatar %}
+            <img src="{{ profile.avatar.url }}" class="rounded-circle mb-3" style="width: 180px; height: 180px; object-fit: cover; border: 3px solid #eee;" alt="{{ profile.user.username }}'s avatar">
+          {% else %}
+            <img src="https://via.placeholder.com/180" class="rounded-circle mb-3" alt="No avatar">
+          {% endif %}
+          <h3>{{ profile.user.username }}</h3>
+          <p class="text-muted">{{ profile.bio|default:'No bio yet.' }}</p>
+          {% if is_owner %}
+            <hr>
+            <h5>Edit Profile</h5>
+            <form method="post" enctype="multipart/form-data">
+              {% csrf_token %}
+              {{ form.as_p }}
+              <button type="submit" class="btn btn-primary btn-sm">Update Profile</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <h4>User Posts</h4>
+      {% for post in posts %}
+        <div class="card mb-3">
+          <div class="card-body">
+            <p>{{ post.text }}</p>
+            {% if post.image %}
+              <img src="{{ post.image.url }}" class="img-fluid mb-2">
+            {% endif %}
+            <small class="text-muted">{{ post.timestamp }}</small>
+          </div>
+        </div>
+      {% empty %}
+        <p>No posts yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

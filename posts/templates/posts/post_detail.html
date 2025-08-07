@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5 class="card-title">{{ post.user.username }}</h5>
+      <p class="card-text">{{ post.text }}</p>
+      {% if post.image %}
+        <img src="{{ post.image.url }}" class="img-fluid mb-2">
+      {% endif %}
+      <button class="btn btn-outline-primary btn-sm like-btn" data-post-id="{{ post.id }}">
+        Like (<span class="like-count">{{ post.likes.count }}</span>)
+      </button>
+      <small class="text-muted float-end">{{ post.timestamp }}</small>
+    </div>
+  </div>
+  <h4>Comments</h4>
+  {% for comment in comments %}
+    <div class="card mb-2">
+      <div class="card-body">
+        <strong>{{ comment.user.username }}</strong>: {{ comment.text }}
+        <small class="text-muted float-end">{{ comment.timestamp }}</small>
+        {% if comment.user == request.user %}
+          <a href="{% url 'edit_comment' comment.id %}" class="btn btn-link btn-sm">Edit</a>
+          <a href="{% url 'delete_comment' comment.id %}" class="btn btn-link btn-sm text-danger">Delete</a>
+        {% endif %}
+      </div>
+    </div>
+  {% empty %}
+    <p>No comments yet.</p>
+  {% endfor %}
+  <form method="post" action="{% url 'add_comment' post.id %}">
+    {% csrf_token %}
+    {{ comment_form.as_p }}
+    <button type="submit" class="btn btn-primary btn-sm">Add Comment</button>
+  </form>
+</div>
+<script>
+document.querySelectorAll('.like-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const postId = this.getAttribute('data-post-id');
+    fetch(`/posts/like/${postId}/`, {method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'}})
+      .then(response => response.json())
+      .then(data => {
+        this.querySelector('.like-count').textContent = data.like_count;
+        this.classList.toggle('btn-primary', data.liked);
+        this.classList.toggle('btn-outline-primary', !data.liked);
+      });
+  });
+});
+</script>
+{% endblock %}
