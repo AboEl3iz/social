@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Share Post</h2>
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5 class="card-title">{{ original_post.user.username }}</h5>
+      <p class="card-text">{{ original_post.text }}</p>
+      {% if original_post.image %}
+        <img src="{{ original_post.image.url }}" class="img-fluid mb-2">
+      {% endif %}
+      <small class="text-muted">{{ original_post.timestamp }}</small>
+    </div>
+  </div>
+  
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="text" class="form-label">Add your thoughts (optional):</label>
+      <textarea name="text" class="form-control" rows="3" placeholder="What do you think about this post?"></textarea>
+    </div>
+    <button type="submit" class="btn btn-success">Share Post</button>
+    <a href="{% url 'home_feed' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

@@ -9,6 +9,7 @@ from .forms import UserRegisterForm, ProfileForm, SettingsForm
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.urls import reverse
+from django.template.loader import render_to_string
 
 # Create your views here.
 
@@ -24,9 +25,24 @@ def register_view(request):
             Profile.objects.create(user=user)
             Settings.objects.create(user=user)
             # Send welcome email
+            welcome_message = f"""
+            Welcome to SocialHub, {user.username}!
+            
+            Thank you for joining our community. Here's what you can do:
+            - Create and share posts with images
+            - Follow other users
+            - Like and comment on posts
+            - Search for users and content
+            - Customize your profile and privacy settings
+            
+            Get started by creating your first post!
+            
+            Best regards,
+            The SocialHub Team
+            """
             send_mail(
                 'Welcome to SocialHub!',
-                'Thank you for registering at SocialHub.',
+                welcome_message,
                 settings.DEFAULT_FROM_EMAIL,
                 [user.email],
                 fail_silently=True,
@@ -107,3 +123,72 @@ def password_reset_view(request):
     else:
         form = PasswordResetForm()
     return render(request, 'users/password_reset.html', {'form': form})
+
+# Email notification functions
+def send_like_notification(post, liker):
+    """Send email notification when someone likes your post"""
+    if post.user != liker and post.user.settings.email_notifications:
+        subject = f'{liker.username} liked your post'
+        message = f"""
+        Hi {post.user.username},
+        
+        {liker.username} just liked your post: "{post.text[:50]}{'...' if len(post.text) > 50 else ''}"
+        
+        View your post: http://127.0.0.1:8000/posts/post/{post.id}/
+        
+        Best regards,
+        SocialHub Team
+        """
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [post.user.email],
+            fail_silently=True,
+        )
+
+def send_comment_notification(post, commenter):
+    """Send email notification when someone comments on your post"""
+    if post.user != commenter and post.user.settings.email_notifications:
+        subject = f'{commenter.username} commented on your post'
+        message = f"""
+        Hi {post.user.username},
+        
+        {commenter.username} just commented on your post: "{post.text[:50]}{'...' if len(post.text) > 50 else ''}"
+        
+        Comment: "{commenter.comment_set.last().text}"
+        
+        View your post: http://127.0.0.1:8000/posts/post/{post.id}/
+        
+        Best regards,
+        SocialHub Team
+        """
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [post.user.email],
+            fail_silently=True,
+        )
+
+def send_follow_notification(follower, following):
+    """Send email notification when someone follows you"""
+    if following.settings.email_notifications:
+        subject = f'{follower.username} started following you'
+        message = f"""
+        Hi {following.username},
+        
+        {follower.username} just started following you on SocialHub!
+        
+        View their profile: http://127.0.0.1:8000/users/profile/{follower.username}/
+        
+        Best regards,
+        SocialHub Team
+        """
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [following.email],
+            fail_silently=True,
+        )
