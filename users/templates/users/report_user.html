@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Report User</h2>
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5 class="card-title">Reporting: {{ reported_user.username }}</h5>
+      <p class="card-text">Please select a reason for reporting this user.</p>
+    </div>
+  </div>
+  
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="reason" class="form-label">Reason:</label>
+      <select name="reason" class="form-control" required>
+        <option value="">Select a reason...</option>
+        <option value="spam">Spam</option>
+        <option value="inappropriate">Inappropriate Content</option>
+        <option value="harassment">Harassment</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="description" class="form-label">Description (optional):</label>
+      <textarea name="description" class="form-control" rows="4" placeholder="Please provide additional details..."></textarea>
+    </div>
+    <button type="submit" class="btn btn-warning">Submit Report</button>
+    <a href="{% url 'search_users' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

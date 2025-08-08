@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Search Users</h2>
+  <form method="get" class="mb-4">
+    <div class="input-group">
+      <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search users...">
+      <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+  </form>
+  
+  {% if query %}
+    <h4>Search Results for "{{ query }}"</h4>
+    {% for user in users %}
+      <div class="card mb-2">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h5 class="card-title">{{ user.username }}</h5>
+              <p class="card-text">{{ user.profile.bio|default:"No bio" }}</p>
+            </div>
+            <div class="col-md-4 text-end">
+              <a href="{% url 'profile' user.username %}" class="btn btn-outline-primary btn-sm">View Profile</a>
+              <a href="{% url 'follow_user' user.id %}" class="btn btn-outline-success btn-sm">Follow</a>
+              <a href="{% url 'report_user' user.id %}" class="btn btn-outline-warning btn-sm">Report</a>
+              <a href="{% url 'block_user' user.id %}" class="btn btn-outline-danger btn-sm">Block</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>No users found matching "{{ query }}".</p>
+    {% endfor %}
+  {% endif %}
+</div>
+{% endblock %}
